@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석 보고</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+        button { padding: 10px; cursor: pointer; }
+        #summary, #details { white-space: pre-wrap; background: #f3f3f3; padding: 10px; height: 200px; }
+    </style>
+</head>
+<body>
+    <h2>출석 보고 시스템</h2>
+    <div id="inputs">
+        <h4>14개 지역 데이터 입력</h4>
+        <script>
+            const areaNames = ["보라매1","보라매2","목동","홍대","영등포","숭실","노량진","문래","대학부","새신자","새신자부","여의도","국제","전입부"];
+            document.write(areaNames.map(name => `<label>${name}<br><textarea id="${name}"></textarea></label>`).join("<br>"));
+        </script>
+    </div>
+    <button onclick="processAttendance()">출석 분석</button>
+    <h3>요약:</h3>
+    <textarea id="summary" readonly></textarea>
+    <h3>상세 내역:</h3>
+    <textarea id="details" readonly></textarea>
+
+    <script>
+        function processAttendance() {
+            let onTimeArr = 0;
+            let lateTimeArr = [];
+            let cannotArr = [];
+            let summaryText = "💒 비투비센터 회차 보고\n• 일시: 420201(토) 10:30\n• 장소: 구디교육관 5층\n";
+            let detailsText = "";
+
+            areaNames.forEach(area => {
+                let stdList = document.getElementById(area).value;
+                let onTime = (stdList.split("*정시도착")[1] || "").split("*지각")[0].replace(/\s+/g, " ").trim();
+                let late = (stdList.split("지역/이름/도착예정시간(사유)")[1] || "").split("- 불참")[0].replace(/\s+/g, " ").replace(/\(20분 이상 지각시 불참으로 작성\)/g, "").trim();
+                let cannot = (stdList.split("지역/이름/사유")[1] || "").replace(/\n\n/g, "").trim();
+
+                let onTimeList = onTime ? onTime.split(" ") : [];
+                let lateList = late ? late.split(" ") : [];
+                let cannotList = cannot ? cannot.split("\n") : [];
+
+                onTimeArr += onTimeList.length;
+                lateTimeArr = lateTimeArr.concat(lateList);
+                cannotArr = cannotArr.concat(cannotList);
+
+                if (lateList.length > 0 || cannotList.length > 0) {
+                    detailsText += `\n${area} 지역\n`;
+                    if (lateList.length > 0) {
+                        detailsText += `- 지각: ${lateList.length}명\n${lateList.join("\n")}\n`;
+                    }
+                    if (cannotList.length > 0) {
+                        detailsText += `- 결석: ${cannotList.length}명\n${cannotList.join("\n")}\n`;
+                    }
+                }
+            });
+            
+            summaryText += `- 총원: ${onTimeArr + lateTimeArr.length + cannotArr.length}\n`;
+            summaryText += `- 출석자: ${onTimeArr}\n`;
+            summaryText += `- 지각자: ${lateTimeArr.length}\n`;
+            if (lateTimeArr.length > 0) {
+                summaryText += `${lateTimeArr.join("\n")}\n`;
+            }
+            summaryText += `- 결석자: ${cannotArr.length}\n`;
+            if (cannotArr.length > 0) {
+                summaryText += `${cannotArr.join("\n")}\n`;
+            }
+            
+            document.getElementById("summary").value = summaryText;
+            document.getElementById("details").value = detailsText;
+        }
+    </script>
+</body>
+</html>
