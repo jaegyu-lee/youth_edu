@@ -40,7 +40,7 @@
                 let late = (stdList.split("지역/이름/도착예정시간(사유)")[1] || "").split("- 불참")[0].replace(/\s+/g, " ").replace(/\(20분 이상 지각시 불참으로 작성\)/g, "").trim();
                 let cannot = (stdList.split("지역/이름/사유")[1] || "").replace(/\n\n/g, "").trim();
 
-                let onTimeList = onTime ? onTime.split(" ") : [];
+                let onTimeList = onTime ? onTime.split(" ").filter(name => name !== "이름") : [];
                 let lateList = late ? late.split(" ") : [];
                 let cannotList = cannot ? cannot.split("\n") : [];
 
@@ -48,24 +48,26 @@
                 lateTimeArr = lateTimeArr.concat(lateList);
                 cannotArr = cannotArr.concat(cannotList);
 
-                if (lateList.length > 0 || cannotList.length > 0) {
-                    detailsText += `\n${area} 지역\n`;
-                    if (lateList.length > 0) {
-                        detailsText += `- 지각: ${lateList.length}명\n${lateList.join("\n")}\n`;
-                    }
-                    if (cannotList.length > 0) {
-                        detailsText += `- 결석: ${cannotList.length}명\n${cannotList.join("\n")}\n`;
-                    }
+                detailsText += `\n${area} 지역\n`;
+                detailsText += `- 출석: ${onTimeList.length}명\n`;
+                if (onTimeList.length > 0) {
+                    detailsText += `${onTimeList.join("\n")}\n`;
+                }
+                if (lateList.length > 0) {
+                    detailsText += `- 지각: ${lateList.length}명\n${lateList.join("\n")}\n`;
+                }
+                if (cannotList.length > 0) {
+                    detailsText += `- 결석: ${cannotList.length}명\n${cannotList.join("\n")}\n`;
                 }
             });
             
-            summaryText += `- 총원: ${onTimeArr + lateTimeArr.length + cannotArr.length}\n`;
-            summaryText += `- 출석자: ${onTimeArr}\n`;
-            summaryText += `- 지각자: ${lateTimeArr.length}\n`;
+            summaryText += `- 총원: ${onTimeArr + lateTimeArr.length + cannotArr.length}명\n`;
+            summaryText += `- 출석자: ${onTimeArr}명\n`;
+            summaryText += `- 지각자: ${lateTimeArr.length}명\n`;
             if (lateTimeArr.length > 0) {
                 summaryText += `${lateTimeArr.join("\n")}\n`;
             }
-            summaryText += `- 결석자: ${cannotArr.length}\n`;
+            summaryText += `- 결석자: ${cannotArr.length}명\n`;
             if (cannotArr.length > 0) {
                 summaryText += `${cannotArr.join("\n")}\n`;
             }
